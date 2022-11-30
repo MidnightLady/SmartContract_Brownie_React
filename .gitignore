@@ -1,0 +1,10 @@
+__pycache__
+.env
+.history
+.hypothesis/
+build/
+reports/
+.pytest_cache
+.idea
+*/node_modules/
+*/package-lock.json

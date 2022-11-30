@@ -1,2 +1,2 @@
 # SmartContract_Brownie
-solidity, python
+solidity, python, brownie, react
