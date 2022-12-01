@@ -17,15 +17,18 @@ const Dashboard = () => {
     useEffect(() => {
         (async () => {
             const _web3 = await getWeb3()
-
+            let _accounts = null
             // Try and enable accounts (connect metamask)
-            try {
-                window.ethereum.enable()
-            } catch (e) {
-                console.log(e)
+            if (window.ethereum) {
+                try {
+                    _accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+                } catch (e) {
+                    console.log(e)
+                }
+            } else{
+                _accounts = await _web3.eth.getAccounts()
             }
 
-            const _accounts = await _web3.eth.getAccounts()
             const _chainId = parseInt(await _web3.eth.getChainId())
             console.log({_accounts})
             console.log({_chainId})
@@ -40,19 +43,9 @@ const Dashboard = () => {
     }, [chainId])
 
     const getWeb3 = async () => {
-
-        const ethereum = window.ethereum
-        let web3
-
-        if (ethereum) {
-            web3 = new Web3(ethereum)
-        } else if (window.web3) {
-            web3 = window.web3
-        } else {
-            const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
-            web3 = new Web3(provider)
-        }
-
+        const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545')
+        const network = await web3.eth.net.getNetworkType();
+        console.log({network})
         return web3
     }
 
@@ -92,7 +85,7 @@ const Dashboard = () => {
         // Get the address of the most recent deployment from the deployment map
         let address
         try {
-            address = map[chain][contractName].at(-1)
+            address = map[chain][contractName].at(0)
         } catch (e) {
             console.log(`Couldn't find any deployed contract "${contractName}" on the chain "${chain}".`)
             return undefined
@@ -117,6 +110,7 @@ const Dashboard = () => {
             alert("invalid value")
             return
         }
+
         await solidityStorage.methods.set(value).send({from: accounts[0]})
             .on('receipt', async () => {
                 dispatch(slice.actions.setStateProject(({
@@ -126,7 +120,10 @@ const Dashboard = () => {
                 dispatch(slice.actions.setStateProject(({
                     transactionHash: transactionHash
                 })))
-            })
+            }).catch((err) => {
+                console.log("Failed with error: ", err);
+            });
+
 
     }
 
@@ -169,7 +166,6 @@ const Dashboard = () => {
                     type="text"
                     variant="filled"
                     value={solidityInput}
-                    defaultValue={solidityInput}
                     onChange={handleChangeInput}
                 />
                 <br/>

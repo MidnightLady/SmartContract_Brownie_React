@@ -14,7 +14,9 @@ networks:
   default: development
   development:
     cmd_settings:
-      mnemonic: brownie
+#      evm_version: muirGlacier
+#      mnemonic: brownie
+#      port: 7545
       default_balance: 100000000000000000000
       unlock:
 #        - 0x833514593c7798551A20Ac69f98D486e2A12dFe8 # optionally add saved brownie account to Ganache
