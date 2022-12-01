@@ -1,36 +1,60 @@
 import React, {useEffect} from "react"
 import map from "../build/deployments/map.json"
 import {useDispatch, useSelector} from "../store";
-import {getWeb3} from "../getWeb3";
 import {slice} from "../slices/projectSlice";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-
+import Web3 from "web3";
 
 const Dashboard = () => {
     const {
-        web3, accounts, chainId, solidityStorage, solidityValue, solidityInput
+        web3, accounts, chainId, solidityStorage, solidityValue, solidityInput, transactionHash
     } = useSelector(state => state.projects)
 
     const dispatch = useDispatch()
 
-    useEffect(async () => {
+    useEffect(() => {
+        (async () => {
+            const _web3 = await getWeb3()
 
-        const _web3 = await getWeb3()
-        const _accounts = await _web3.eth.getAccounts()
-        const _chainId = parseInt(await _web3.eth.getChainId())
-        console.log({_accounts})
-        console.log({_chainId})
-        dispatch(slice.actions.setStateProject({
-            web3: _web3, accounts: _accounts, chainId: _chainId
-        }))
+            // Try and enable accounts (connect metamask)
+            try {
+                window.ethereum.enable()
+            } catch (e) {
+                console.log(e)
+            }
 
+            const _accounts = await _web3.eth.getAccounts()
+            const _chainId = parseInt(await _web3.eth.getChainId())
+            console.log({_accounts})
+            console.log({_chainId})
+            dispatch(slice.actions.setStateProject({
+                web3: _web3, accounts: _accounts, chainId: _chainId
+            }))
+        })()
     }, [])
 
-    useEffect(async () => {
-        await loadInitialContracts()
+    useEffect(() => {
+        loadInitialContracts()
     }, [chainId])
+
+    const getWeb3 = async () => {
+
+        const ethereum = window.ethereum
+        let web3
+
+        if (ethereum) {
+            web3 = new Web3(ethereum)
+        } else if (window.web3) {
+            web3 = window.web3
+        } else {
+            const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
+            web3 = new Web3(provider)
+        }
+
+        return web3
+    }
 
     const loadInitialContracts = async () => {
         // <=42 to exclude Kovan, <42 to include kovan
@@ -50,11 +74,10 @@ const Dashboard = () => {
             _chainID = "dev"
         }
         const solidityStorage = await loadContract(_chainID, "SolidityStorage")
-        console.log(solidityStorage)
         if (!solidityStorage) {
             return
         }
-
+        console.log(solidityStorage._address)
 
         const solidityValue = await solidityStorage.methods.get().call()
 
@@ -69,7 +92,7 @@ const Dashboard = () => {
         // Get the address of the most recent deployment from the deployment map
         let address
         try {
-            address = map[chain][contractName][0]
+            address = map[chain][contractName].at(-1)
         } catch (e) {
             console.log(`Couldn't find any deployed contract "${contractName}" on the chain "${chain}".`)
             return undefined
@@ -99,7 +122,12 @@ const Dashboard = () => {
                 dispatch(slice.actions.setStateProject(({
                     solidityValue: await solidityStorage.methods.get().call()
                 })))
+            }).on('transactionHash', async (transactionHash) => {
+                dispatch(slice.actions.setStateProject(({
+                    transactionHash: transactionHash
+                })))
             })
+
     }
 
     const handleChangeInput = (event) => {
@@ -137,8 +165,7 @@ const Dashboard = () => {
         <br/>
         <Box component="form"
              onSubmit={(e) => changeSolidity(e)}
-             autoComplete="off"
-        >
+             autoComplete="off">
             <div>
                 <TextField
                     required
@@ -147,14 +174,21 @@ const Dashboard = () => {
                     type="text"
                     variant="filled"
                     value={solidityInput}
-                    defaultValue=""
+                    defaultValue={solidityInput}
                     onChange={handleChangeInput}
                 />
                 <br/>
                 <Button sx={{marginTop: '10px'}} type="submit" color="secondary" disabled={!isAccountsUnlocked} variant="contained">Submit</Button>
+
+                {transactionHash ? <div>
+                    <p>Last transaction Hash: {transactionHash}</p>
+                </div> : null}
             </div>
         </Box>
     </div>)
 }
 
 export default Dashboard
+
+
+
