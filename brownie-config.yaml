@@ -7,6 +7,8 @@ project_structure:
 autofetch_sources: True
 dotenv: .env
 
+# enable output of development artifacts to load with react
+dev_deployment_artifacts: true
 
 networks:
   default: development
@@ -14,8 +16,11 @@ networks:
     cmd_settings:
       mnemonic: brownie
       default_balance: 100000000000000000000
-      unlock: 0xD9C41eFDEcAEf5Be7E286Ef28B2489E1A98c6120 # optionally add saved brownie account to Ganache
-      # (requires explicit transfer of eth to accounts[-1]) 
+      unlock:
+#        - 0x833514593c7798551A20Ac69f98D486e2A12dFe8 # optionally add saved brownie account to Ganache
+      # (requires explicit transfer of eth to accounts[-1])
+      accounts: 5
+
 
     update_interval: 60
     verify: False
@@ -30,5 +35,3 @@ wallets:
   from_key: ${PRIVATE_KEY}
 
 
-# enable output of development artifacts to load with react
-dev_deployment_artifacts: true
