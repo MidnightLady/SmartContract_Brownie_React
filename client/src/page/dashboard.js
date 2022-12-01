@@ -58,14 +58,14 @@ const Dashboard = () => {
 
     const loadInitialContracts = async () => {
         // <=42 to exclude Kovan, <42 to include kovan
-        if (chainId < 42) {
+        if (chainId === null) {
             // Wrong Network!
             return
         }
 
         let _chainID = 0;
         if (chainId === 5) {
-            _chainID = "goerli";
+            _chainID = 5; // "goerli"
         }
         if (chainId === 42) {
             _chainID = 42;
@@ -137,11 +137,6 @@ const Dashboard = () => {
 
     if (!web3) {
         return <div>Loading Web3, accounts, and contracts...</div>
-    }
-
-    if (isNaN(chainId) || chainId < 42) {
-        return <div>Wrong Network! Switch to your local RPC "Localhost: 8545" in your Web3 provider (e.g.
-            Metamask)</div>
     }
 
     if (!solidityStorage) {

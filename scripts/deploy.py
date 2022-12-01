@@ -12,5 +12,11 @@ def main():
 
     elif network.show_active() == 'goerli':
         # add these accounts to metamask by importing private key
-        owner = accounts.load("deploy")
+        owner = accounts.load("goerli")
         SolidityStorage.deploy({'from': owner})
+
+
+
+
+# get transaction : tx = chain.get_transaction
+#
