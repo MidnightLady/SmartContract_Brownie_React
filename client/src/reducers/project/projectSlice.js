@@ -27,7 +27,9 @@ export const slice = createSlice({
             state.solidityValue = solidityValue ?? state.solidityValue
             state.solidityInput = solidityInput ?? state.solidityInput
             state.transactionHash = transactionHash ?? state.transactionHash
-        }
+        },
+        setInitialState: () => {},
+        changeSolidity:(state,action)=>{},
     },
 });
 

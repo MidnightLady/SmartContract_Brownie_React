@@ -1,5 +1,5 @@
 import React from 'react';
-import {ColorModeContext, useMode} from "./theme";
+import {ColorModeContext, useMode} from "./assets/theme";
 import {CssBaseline, ThemeProvider} from "@mui/material";
 import SideBar from "./components/topBar";
 import Dashboard from "./page/dashboard";

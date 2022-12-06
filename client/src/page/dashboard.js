@@ -1,7 +1,7 @@
 import React, {useEffect} from "react"
 import map from "../build/deployments/map.json"
 import {useDispatch, useSelector} from "../store";
-import {slice} from "../slices/projectSlice";
+import {slice} from "../reducers/project/projectSlice";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -15,93 +15,10 @@ const Dashboard = () => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        (async () => {
-            const _web3 = await getWeb3()
-            let _accounts = null
-            // Try and enable accounts (connect metamask)
-            if (window.ethereum) {
-                try {
-                    _accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
-                } catch (e) {
-                    console.log(e)
-                }
-            } else{
-                _accounts = await _web3.eth.getAccounts()
-            }
-
-            const _chainId = parseInt(await _web3.eth.getChainId())
-            console.log({_accounts})
-            console.log({_chainId})
-            dispatch(slice.actions.setStateProject({
-                web3: _web3, accounts: _accounts, chainId: _chainId
-            }))
-        })()
+        dispatch(slice.actions.setInitialState())
     }, [])
 
-    useEffect(() => {
-        loadInitialContracts()
-    }, [chainId])
-
-    const getWeb3 = async () => {
-        const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545')
-        const network = await web3.eth.net.getNetworkType();
-        console.log({network})
-        return web3
-    }
-
-    const loadInitialContracts = async () => {
-        // <=42 to exclude Kovan, <42 to include kovan
-        if (chainId === null) {
-            // Wrong Network!
-            return
-        }
-
-        let _chainID = 0;
-        if (chainId === 5) {
-            _chainID = 5; // "goerli"
-        }
-        if (chainId === 42) {
-            _chainID = 42;
-        }
-        if (chainId === 1337) {
-            _chainID = "dev"
-        }
-        const solidityStorage = await loadContract(_chainID, "SolidityStorage")
-        if (!solidityStorage) {
-            return
-        }
-        console.log(solidityStorage._address)
-
-        const solidityValue = await solidityStorage.methods.get().call()
-
-        dispatch(slice.actions.setStateProject({
-            solidityStorage, solidityValue,
-        }))
-    }
-
-    const loadContract = async (chain, contractName) => {
-        // Load a deployed contract instance into a web3 contract object
-
-        // Get the address of the most recent deployment from the deployment map
-        let address
-        try {
-            address = map[chain][contractName].at(0)
-        } catch (e) {
-            console.log(`Couldn't find any deployed contract "${contractName}" on the chain "${chain}".`)
-            return undefined
-        }
-
-        // Load the artifact with the specified address
-        let contractArtifact
-        try {
-            contractArtifact = await import(`../build/deployments/${chain}/${address}.json`)
-        } catch (e) {
-            console.log(`Failed to load contract artifact "../build/deployments/${chain}/${address}.json"`)
-            return undefined
-        }
-
-        return new web3.eth.Contract(contractArtifact.abi, address)
-    }
+    useEffect(()=>{},[solidityValue])
 
     const changeSolidity = async (e) => {
         e.preventDefault()

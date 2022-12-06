@@ -16,8 +16,8 @@ networks:
     cmd_settings:
 #      evm_version: muirGlacier
 #      mnemonic: brownie
-#      port: 7545
-      default_balance: 100000000000000000000
+      port: 7545
+      default_balance: 200000000000000000000
       unlock:
 #        - 0x833514593c7798551A20Ac69f98D486e2A12dFe8 # optionally add saved brownie account to Ganache
       # (requires explicit transfer of eth to accounts[-1])
